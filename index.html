@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لأجل الحاوية</title>
+<link rel="manifest" href="manifest.json">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<meta name="theme-color" content="#1a6b3c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الحاوية">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&family=Cairo:wght@300;400;600;700;900&display=swap');
+
+  :root {
+    --primary: #1a6b3c;
+    --primary-light: #2d9e5f;
+    --primary-dark: #0f4225;
+    --accent: #f0b429;
+    --accent-light: #fcd34d;
+    --bg: #f0f4f0;
+    --surface: #ffffff;
+    --surface2: #f7faf7;
+    --text: #1a2e1a;
+    --text-muted: #5a7a5a;
+    --border: #c8dcc8;
+    --danger: #dc2626;
+    --paid: #16a34a;
+    --paid-bg: #dcfce7;
+    --shadow: 0 2px 12px rgba(26,107,60,0.10);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Cairo', 'Noto Naskh Arabic', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SPLASH SCREEN */
+  #splash {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, #0f4225 0%, #1a6b3c 50%, #2d9e5f 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.8s ease;
+  }
+  #splash .logo-arrows {
+    display: flex; gap: 8px; margin-bottom: 24px;
+  }
+  #splash .arrow {
+    width: 18px; height: 60px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 40%, 70% 40%, 70% 100%, 30% 100%, 30% 40%, 0% 40%);
+    animation: arrowRise 1s ease forwards;
+    opacity: 0;
+  }
+  #splash .arrow:nth-child(1) { animation-delay: 0.1s; height: 45px; }
+  #splash .arrow:nth-child(2) { animation-delay: 0.3s; height: 60px; }
+  #splash .arrow:nth-child(3) { animation-delay: 0.5s; height: 52px; }
+  @keyframes arrowRise {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #splash .splash-title {
+    font-family: 'Scheherazade New', serif;
+    font-size: 42px;
+    color: #ffffff;
+    letter-spacing: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typewriter 2s steps(8) 0.8s forwards;
+    width: 0;
+  }
+  @keyframes typewriter {
+    to { width: 100%; }
+  }
+  #splash .splash-sub {
+    color: var(--accent-light);
+    font-size: 14px;
+    margin-top: 12px;
+    opacity: 0;
+    animation: fadeIn 0.5s ease 2.8s forwards;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  /* HEADER */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  header {
+    background: linear-gradient(135deg, #0f4225 0%, #1a6b3c 100%);
+    color: #fff;
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mini { display: flex; gap: 3px; align-items: flex-end; }
+  .logo-mini span {
+    background: var(--accent);
+    border-radius: 2px;
+    width: 6px;
+    display: inline-block;
+  }
+  .logo-mini span:nth-child(1) { height: 14px; }
+  .logo-mini span:nth-child(2) { height: 20px; }
+  .logo-mini span:nth-child(3) { height: 17px; }
+  .header-title { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+  .header-sub { font-size: 11px; opacity: 0.75; }
+  .header-year {
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 16px; font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  /* AYAT BANNER */
+  .ayat-banner {
+    text-align: center;
+    padding: 10px 20px;
+    font-family: 'Scheherazade New', serif;
+    font-size: 18px;
+    line-height: 1.8;
+    transition: all 0.5s ease;
+    border-bottom: 1px solid var(--border);
+  }
+  .ayat-1 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #78350f; }
+  .ayat-2 { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #064e3b; }
+  .ayat-3 { background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #3730a3; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex; gap: 10px; padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .stat-card {
+    flex: 1; min-width: 100px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    text-align: center;
+  }
+  .stat-card .val { font-size: 18px; font-weight: 700; color: var(--primary); }
+  .stat-card .lbl { font-size: 11px; color: var(--text-muted); }
+
+  /* MAIN CONTENT */
+  .main-content { flex: 1; padding: 12px; overflow: hidden; }
+
+  /* TABLE */
+  .table-wrapper {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: auto;
+    border: 1px solid var(--border);
+  }
+  table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+    direction: rtl;
+  }
+  th {
+    background: linear-gradient(135deg, #0f4225, #1a6b3c);
+    color: #fff;
+    padding: 10px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    position: sticky; top: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+  }
+  th.name-col { min-width: 140px; position: sticky; right: 0; z-index: 10; }
+  th.total-col { background: linear-gradient(135deg, #0c3320, #155c33); min-width: 90px; }
+  td {
+    padding: 6px 4px;
+    border: 1px solid var(--border);
+    text-align: center;
+    font-size: 13px;
+  }
+  td.name-cell {
+    background: var(--surface);
+    position: sticky; right: 0; z-index: 5;
+    min-width: 140px;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-right: 3px solid var(--primary);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  tr:nth-child(even) td { background: var(--surface2); }
+  tr:nth-child(even) td.name-cell { background: var(--surface2); }
+
+  .contrib-cell {
+    width: 52px; min-width: 52px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    border-radius: 4px;
+    font-size: 16px;
+    height: 38px;
+  }
+  .contrib-cell:hover { background: #dcfce7 !important; transform: scale(1.05); }
+  .contrib-cell.paid {
+    background: var(--paid-bg) !important;
+    color: var(--paid);
+    font-size: 18px;
+  }
+  .contrib-cell.unpaid { background: #fff5f5; color: #ccc; }
+
+  td.total-cell {
+    background: #f0fdf4 !important;
+    color: var(--primary-dark);
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 90px;
+  }
+
+  .trash-btn {
+    background: none; border: none; cursor: pointer;
+    color: #ef4444; font-size: 14px; padding: 2px 4px;
+    opacity: 0.6; transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+  .trash-btn:hover { opacity: 1; }
+  .name-text { flex: 1; text-align: right; font-size: 13px; }
+
+  /* FAB BUTTONS */
+  .fab-container {
+    position: fixed; left: 16px; bottom: 16px;
+    display: flex; flex-direction: column; gap: 10px; align-items: center;
+    z-index: 200;
+  }
+  .fab {
+    width: 46px; height: 46px; border-radius: 50%;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .fab:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+  .fab-add { background: var(--primary); color: #fff; font-size: 26px; }
+  .fab-calc { background: #1d4ed8; color: #fff; font-size: 18px; }
+
+  /* TOP FABs */
+  .top-fabs {
+    position: fixed; left: 16px; top: 70px;
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 200;
+  }
+  .fab-sm {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+    background: var(--surface);
+    border: 2px solid var(--border);
+  }
+  .fab-sm:hover { transform: scale(1.1); }
+
+  /* CHART BUTTON */
+  .chart-fab {
+    position: fixed; right: 16px; bottom: 16px;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: #7c3aed; color: #fff;
+    border: none; cursor: pointer; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 200;
+    transition: transform 0.2s;
+  }
+  .chart-fab:hover { transform: scale(1.1); }
+
+  /* MODALS */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%; max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    max-height: 90vh; overflow-y: auto;
+    direction: rtl;
+  }
+  .modal h3 {
+    font-size: 18px; margin-bottom: 16px;
+    color: var(--primary-dark); text-align: center;
+    border-bottom: 2px solid var(--border); padding-bottom: 10px;
+  }
+  .modal input, .modal select {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'Cairo', sans-serif; font-size: 14px;
+    direction: rtl; margin-bottom: 12px;
+    background: var(--surface2);
+    outline: none;
+  }
+  .modal input:focus, .modal select:focus { border-color: var(--primary); }
+  .modal-btns { display: flex; gap: 10px; }
+  .btn-primary {
+    flex: 1; padding: 10px;
+    background: var(--primary); color: #fff;
+    border: none; border-radius: 8px;
+    cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-secondary {
+    flex: 1; padding: 10px;
+    background: var(--surface2); color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 8px;
+    cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 14px;
+  }
+  .btn-danger {
+    flex: 1; padding: 10px;
+    background: var(--danger); color: #fff;
+    border: none; border-radius: 8px;
+    cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600;
+  }
+
+  /* CALCULATOR */
+  .calc-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-top: 12px;
+  }
+  .calc-btn {
+    padding: 14px 0;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    background: var(--surface2); font-size: 16px;
+    cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-weight: 600; transition: background 0.15s;
+  }
+  .calc-btn:hover { background: var(--border); }
+  .calc-btn.op { background: #fef3c7; color: #92400e; }
+  .calc-btn.eq { background: var(--primary); color: #fff; }
+  .calc-btn.clear { background: #fee2e2; color: #991b1b; }
+  .calc-display {
+    background: #1a2e1a; color: #4ade80;
+    padding: 14px 12px; border-radius: 10px;
+    font-size: 24px; text-align: left;
+    font-family: monospace; min-height: 54px;
+    word-break: break-all; direction: ltr;
+  }
+
+  /* CHART */
+  .chart-container { margin-top: 12px; overflow-x: auto; }
+  .bar-chart {
+    display: flex; align-items: flex-end; gap: 6px;
+    height: 160px; padding: 0 4px;
+    border-bottom: 2px solid var(--border);
+  }
+  .bar-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar-fill {
+    width: 32px; border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--primary-light), var(--primary-dark));
+    min-height: 4px; transition: height 0.5s ease;
+    position: relative;
+  }
+  .bar-fill.top1 { background: linear-gradient(180deg, #fcd34d, #f59e0b); }
+  .bar-fill.top2 { background: linear-gradient(180deg, #a3e635, #65a30d); }
+  .bar-fill.top3 { background: linear-gradient(180deg, #67e8f9, #0891b2); }
+  .bar-label { font-size: 10px; text-align: center; max-width: 40px; color: var(--text-muted); }
+  .bar-val { font-size: 9px; font-weight: 700; color: var(--primary); }
+
+  /* SEARCH RESULTS */
+  .search-result-item {
+    padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 8px; background: var(--surface2);
+  }
+  .search-result-item .sr-name { font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; }
+  .search-result-item .sr-months {
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .month-badge {
+    padding: 2px 8px; border-radius: 12px;
+    font-size: 11px; font-weight: 600;
+  }
+  .month-badge.paid { background: var(--paid-bg); color: var(--paid); }
+  .month-badge.unpaid { background: #fee2e2; color: #b91c1c; }
+
+  /* TRASH */
+  .trash-item {
+    padding: 10px 12px;
+    border: 1px solid #fca5a5; border-radius: 8px;
+    margin-bottom: 8px; background: #fff5f5;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .restore-btn {
+    background: var(--primary); color: #fff;
+    border: none; border-radius: 6px;
+    padding: 4px 10px; cursor: pointer; font-size: 12px;
+    font-family: 'Cairo', sans-serif;
+  }
+
+  /* CALENDAR */
+  .year-picker { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; justify-content: center; }
+  .year-picker button {
+    background: var(--primary); color: #fff;
+    border: none; border-radius: 6px; padding: 6px 12px;
+    cursor: pointer; font-size: 16px;
+  }
+  .year-display { font-size: 24px; font-weight: 700; color: var(--primary-dark); min-width: 80px; text-align: center; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: #1a2e1a; color: #4ade80;
+    padding: 10px 20px; border-radius: 20px;
+    font-size: 13px; z-index: 9999;
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2s forwards;
+    white-space: nowrap;
+  }
+  @keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+  @keyframes toastOut { to { opacity:0; } }
+
+  /* SETTINGS */
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .settings-row label { font-weight: 600; color: var(--text-muted); font-size: 13px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 480px) {
+    .stats-bar { flex-wrap: wrap; }
+    .stat-card { min-width: 80px; }
+  }
+</style>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD35o-PgjEXEO-Uh-72TbvBMiYhZ8kVnxc",
+  authDomain: "hajal-hawiya.firebaseapp.com",
+  projectId: "hajal-hawiya",
+  storageBucket: "hajal-hawiya.firebasestorage.app",
+  messagingSenderId: "993283551529",
+  appId: "1:993283551529:web:6cc38b9e4f2a1234abcd",
+  measurementId: "G-Q4ZZ714EVW"
+};
+try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+const db = typeof firebase !== "undefined" ? firebase.firestore() : null;
+const CLOUD_COL = "hajal_data";
+const CLOUD_DOC = "main";
+
+async function syncToCloud(stateData) {
+  if (!db) return;
+  try {
+    const payload = { data: JSON.stringify({...stateData, updatedAt: Date.now()}) };
+    await db.collection(CLOUD_COL).doc(CLOUD_DOC).set(payload);
+    showSyncStatus("☁️ تمت المزامنة مع السحابة");
+  } catch(e) { showSyncStatus("⚠️ فشل الحفظ السحابي - تحقق من الاتصال"); }
+}
+
+async function loadFromCloud() {
+  if (!db) return false;
+  try {
+    const doc = await db.collection(CLOUD_COL).doc(CLOUD_DOC).get();
+    if (doc.exists) {
+      const cloudState = JSON.parse(doc.data().data);
+      const localRaw = localStorage.getItem("hajal_hawiya_v2");
+      const localState = localRaw ? JSON.parse(localRaw) : null;
+      if (!localState || (cloudState.updatedAt && (!localState.updatedAt || cloudState.updatedAt > localState.updatedAt))) {
+        localStorage.setItem("hajal_hawiya_v2", JSON.stringify(cloudState));
+        showSyncStatus("☁️ تم استرجاع البيانات من السحابة");
+        return true;
+      }
+    }
+  } catch(e) { console.log("Cloud load error", e); }
+  return false;
+}
+
+function showSyncStatus(msg) {
+  const el = document.getElementById("sync-status");
+  if (!el) return;
+  el.textContent = msg;
+  el.style.opacity = "1";
+  setTimeout(() => { if(el) el.style.opacity = "0"; }, 4000);
+}
+</script>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="logo-arrows">
+    <div class="arrow"></div>
+    <div class="arrow"></div>
+    <div class="arrow"></div>
+  </div>
+  <div class="splash-title">لأجل الحاوية</div>
+  <div class="splash-sub">نظام متابعة المساهمات السنوية</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- HEADER -->
+  <header>
+    <div class="header-logo">
+      <div class="logo-mini">
+        <span></span><span></span><span></span>
+      </div>
+      <div>
+        <div class="header-title">لأجل الحاوية</div>
+        <div class="header-sub">متابعة المساهمات</div>
+      </div>
+    </div>
+    <div id="header-year" class="header-year">2026</div>
+    <div id="sync-status" style="font-size:11px;color:#a7f3d0;opacity:0;transition:opacity 0.5s;text-align:center;min-width:80px;">☁️</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="openModal('settings-modal')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-family:Cairo,sans-serif;">⚙️ إعدادات</button>
+    </div>
+  </header>
+
+  <!-- AYAT BANNER -->
+  <div id="ayat-banner" class="ayat-banner ayat-1"></div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="val" id="stat-members">0</div>
+      <div class="lbl">المساهمون</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="stat-paid">0</div>
+      <div class="lbl">مدفوعة</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="stat-unpaid">0</div>
+      <div class="lbl">متبقية</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="stat-total">0</div>
+      <div class="lbl">إجمالي (جنيه)</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="main-content">
+    <div class="table-wrapper">
+      <table id="contrib-table">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TOP FABS -->
+<div class="top-fabs">
+  <button class="fab-sm" onclick="openModal('search-modal')" title="بحث">🔍</button>
+  <button class="fab-sm" onclick="openModal('calendar-modal')" title="التقويم">🗓️</button>
+  <button class="fab-sm" onclick="openModal('trash-modal')" title="المهملات">🗑️</button>
+</div>
+
+<!-- BOTTOM FABS -->
+<div class="fab-container">
+  <button class="fab fab-calc" onclick="openModal('calc-modal')" title="الآلة الحاسبة">🖩</button>
+  <button class="fab fab-add" onclick="openModal('add-modal')" title="إضافة مساهم">+</button>
+</div>
+<button class="chart-fab" onclick="openModal('chart-modal')" title="الرسم البياني">📊</button>
+
+<!-- ===== MODALS ===== -->
+
+<!-- ADD MEMBER -->
+<div id="add-modal" class="modal-overlay" style="display:none" onclick="closeModalOutside(event,'add-modal')">
+  <div class="modal">
+    <h3>➕ إضافة مساهم جديد</h3>
+    <input type="text" id="new-member-name" placeholder="اسم المساهم" />
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="addMember()">تأكيد الإضافة</button>
+      <button class="btn-secondary" onclick="closeModal('add-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div id="search-modal" class="modal-overlay" style="display:none" onclick="closeModalOutside(event,'search-modal')">
+  <div class="modal">
+    <h3>🔍 البحث عن مساهم</h3>
+    <input type="text" id="search-input" placeholder="ابحث باسم المساهم..." oninput="doSearch()" />
+    <div id="search-results"></div>
+    <div class="modal-btns" style="margin-top:10px">
+      <button class="btn-secondary" onclick="closeModal('search-modal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div id="calendar-modal" class="modal-overlay" style="display:none" onclick="closeModalOutside(event,'calendar-modal')">
+  <div class="modal">
+    <h3>🗓️ تقويم السنوات</h3>
+    <div class="year-picker">
+      <button onclick="changeCalYear(-1)">◀</button>
+      <div class="year-display" id="cal-year-display">2026</div>
+      <button onclick="changeCalYear(1)">▶</button>
+    </div>
+    <div id="cal-content"></div>
+    <div class="modal-btns" style="margin-top:10px">
+      <button class="btn-primary" onclick="viewYear()">عرض هذه السنة</button>
+      <button class="btn-secondary" onclick="closeModal('calendar-modal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRASH -->
+<div id="trash-modal" class="modal-overlay" style="display:none" onclick="closeModalOutside(event,'trash-modal')">
+  <div class="modal">
+    <h3>🗑️ سلة المهملات</h3>
+    <div id="trash-list"></div>
+    <div class="modal-btns" style="margin-top:10px">
+      <button class="btn-secondary" onclick="closeModal('trash-modal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div id="confirm-modal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <h3>⚠️ تأكيد الحذف</h3>
+    <p style="text-align:center;margin-bottom:16px;color:var(--text-muted)">هل تريد حذف هذا المساهم؟ يمكنك استرجاعه لاحقاً من سلة المهملات.</p>
+    <div class="modal-btns">
+      <button class="btn-danger" id="confirm-delete-btn">حذف</button>
+      <button class="btn-secondary" onclick="closeModal('confirm-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- CALCULATOR -->
+<div id="calc-modal" class="modal-overlay" style="display:none" onclick="closeModalOutside(event,'calc-modal')">
+  <div class="modal">
+    <h3>🖩 الآلة الحاسبة</h3>
+    <div class="calc-display" id="calc-display">0</div>
+    <div class="calc-grid">
+      <button class="calc-btn clear" onclick="calcAction('C')">C</button>
+      <button class="calc-btn op" onclick="calcAction('%')">%</button>
+      <button class="calc-btn op" onclick="calcAction('±')">±</button>
+      <button class="calc-btn op" onclick="calcAction('/')">÷</button>
+      <button class="calc-btn" onclick="calcAction('7')">7</button>
+      <button class="calc-btn" onclick="calcAction('8')">8</button>
+      <button class="calc-btn" onclick="calcAction('9')">9</button>
+      <button class="calc-btn op" onclick="calcAction('*')">×</button>
+      <button class="calc-btn" onclick="calcAction('4')">4</button>
+      <button class="calc-btn" onclick="calcAction('5')">5</button>
+      <button class="calc-btn" onclick="calcAction('6')">6</button>
+      <button class="calc-btn op" onclick="calcAction('-')">−</button>
+      <button class="calc-btn" onclick="calcAction('1')">1</button>
+      <button class="calc-btn" onclick="calcAction('2')">2</button>
+      <button class="calc-btn" onclick="calcAction('3')">3</button>
+      <button class="calc-btn op" onclick="calcAction('+')">+</button>
+      <button class="calc-btn" onclick="calcAction('0')" style="grid-column:span 2">0</button>
+      <button class="calc-btn" onclick="calcAction('.')">.</button>
+      <button class="calc-btn eq" onclick="calcAction('=')">=</button>
+    </div>
+    <div class="modal-btns" style="margin-top:12px">
+      <button class="btn-secondary" onclick="closeModal('calc-modal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHART -->
+<div id="chart-modal" class="modal-overlay" style="display:none" onclick="closeModalOutside(event,'chart-modal')">
+  <div class="modal" style="max-width:500px">
+    <h3>📊 أعلى المساهمين للسنة <span id="chart-year-label"></span></h3>
+    <div class="chart-container">
+      <div class="bar-chart" id="bar-chart"></div>
+      <div id="chart-legend" style="margin-top:10px;font-size:12px;"></div>
+    </div>
+    <div class="modal-btns" style="margin-top:12px">
+      <button class="btn-secondary" onclick="closeModal('chart-modal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings-modal" class="modal-overlay" style="display:none" onclick="closeModalOutside(event,'settings-modal')">
+  <div class="modal">
+    <h3>⚙️ الإعدادات</h3>
+    <div class="settings-row">
+      <label>قيمة المساهمة الشهرية (جنيه)</label>
+      <input type="number" id="contrib-value-input" style="width:120px;margin:0" min="1" />
+    </div>
+    <div class="modal-btns" style="margin-top:16px">
+      <button class="btn-primary" onclick="saveSettings()">حفظ</button>
+      <button class="btn-secondary" onclick="syncToCloud(state);showToast('جاري المزامنة...')">☁️ مزامنة</button>
+      <button class="btn-secondary" onclick="closeModal('settings-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+const MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const MIN_YEAR = 2026;
+
+let state = {
+  currentYear: 2026,
+  contribValue: 500,
+  members: [],
+  trash: [],
+  // data[year][memberId][monthIndex] = true/false
+  data: {}
+};
+
+// Load from localStorage
+function loadState() {
+  try {
+    const saved = localStorage.getItem('hajal_hawiya_v2');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state = { ...state, ...parsed };
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  // Save to cloud with debounce
+  clearTimeout(window._syncTimer);
+  window._syncTimer = setTimeout(() => syncToCloud(state), 2000);
+  try {
+    localStorage.setItem('hajal_hawiya_v2', JSON.stringify(state));
+  } catch(e) {}
+}
+
+// ========== INIT ==========
+function init() {
+  loadState();
+  if (!state.data) state.data = {};
+  ensureYearData(state.currentYear);
+  renderTable();
+  updateStats();
+  startAyatRotation();
+  document.getElementById('contrib-value-input').value = state.contribValue;
+  document.getElementById('header-year').textContent = state.currentYear;
+}
+
+function ensureYearData(year) {
+  if (!state.data[year]) state.data[year] = {};
+  state.members.forEach(m => {
+    if (!state.data[year][m.id]) {
+      state.data[year][m.id] = Array(12).fill(false);
+    }
+  });
+}
+
+// ========== TABLE ==========
+function renderTable() {
+  const year = state.currentYear;
+  ensureYearData(year);
+
+  // Head
+  const head = document.getElementById('table-head');
+  head.innerHTML = `<tr>
+    <th class="name-col">اسم المساهم</th>
+    ${MONTHS.map(m => `<th>${m}</th>`).join('')}
+    <th class="total-col">الإجمالي</th>
+  </tr>`;
+
+  // Body
+  const body = document.getElementById('table-body');
+  body.innerHTML = '';
+
+  state.members.forEach(member => {
+    const mData = state.data[year][member.id] || Array(12).fill(false);
+    const paidCount = mData.filter(Boolean).length;
+    const total = paidCount * state.contribValue;
+
+    const tr = document.createElement('tr');
+
+    // Name cell
+    const nameTd = document.createElement('td');
+    nameTd.className = 'name-cell';
+    nameTd.innerHTML = `
+      <span class="name-text">${member.name}</span>
+      <button class="trash-btn" onclick="confirmDelete('${member.id}')" title="حذف">🗑️</button>
+    `;
+    tr.appendChild(nameTd);
+
+    // Month cells
+    MONTHS.forEach((_, mi) => {
+      const td = document.createElement('td');
+      td.className = 'contrib-cell ' + (mData[mi] ? 'paid' : 'unpaid');
+      td.textContent = mData[mi] ? '✓' : '';
+      td.dataset.memberId = member.id;
+      td.dataset.monthIndex = mi;
+      td.onclick = () => toggleCell(member.id, mi);
+      tr.appendChild(td);
+    });
+
+    // Total
+    const totalTd = document.createElement('td');
+    totalTd.className = 'total-cell';
+    totalTd.textContent = total.toLocaleString('ar') + ' ج';
+    tr.appendChild(totalTd);
+
+    body.appendChild(tr);
+  });
+
+  document.getElementById('header-year').textContent = year;
+}
+
+function toggleCell(memberId, monthIndex) {
+  const year = state.currentYear;
+  ensureYearData(year);
+  if (!state.data[year][memberId]) state.data[year][memberId] = Array(12).fill(false);
+  state.data[year][memberId][monthIndex] = !state.data[year][memberId][monthIndex];
+  saveState();
+  renderTable();
+  updateStats();
+}
+
+function updateStats() {
+  const year = state.currentYear;
+  ensureYearData(year);
+  let totalPaid = 0, totalCells = 0;
+  state.members.forEach(m => {
+    const mData = state.data[year][m.id] || Array(12).fill(false);
+    const paid = mData.filter(Boolean).length;
+    totalPaid += paid;
+    totalCells += 12;
+  });
+  document.getElementById('stat-members').textContent = state.members.length;
+  document.getElementById('stat-paid').textContent = totalPaid;
+  document.getElementById('stat-unpaid').textContent = totalCells - totalPaid;
+  document.getElementById('stat-total').textContent = (totalPaid * state.contribValue).toLocaleString('ar');
+}
+
+// ========== MEMBERS ==========
+function addMember() {
+  const name = document.getElementById('new-member-name').value.trim();
+  if (!name) { showToast('يرجى إدخال اسم المساهم'); return; }
+  const id = 'm_' + Date.now();
+  state.members.push({ id, name });
+  ensureYearData(state.currentYear);
+  state.data[state.currentYear][id] = Array(12).fill(false);
+  saveState();
+  renderTable();
+  updateStats();
+  document.getElementById('new-member-name').value = '';
+  closeModal('add-modal');
+  showToast('تمت إضافة ' + name);
+}
+
+let pendingDeleteId = null;
+function confirmDelete(id) {
+  pendingDeleteId = id;
+  openModal('confirm-modal');
+  document.getElementById('confirm-delete-btn').onclick = () => deleteMember(id);
+}
+
+function deleteMember(id) {
+  const member = state.members.find(m => m.id === id);
+  if (!member) return;
+  state.trash.push({ ...member, deletedAt: Date.now(), data: JSON.parse(JSON.stringify(state.data)) });
+  state.members = state.members.filter(m => m.id !== id);
+  saveState();
+  renderTable();
+  updateStats();
+  closeModal('confirm-modal');
+  showToast('تم حذف ' + member.name + ' — يمكن استرجاعه من المهملات');
+}
+
+function openTrash() {
+  const list = document.getElementById('trash-list');
+  if (state.trash.length === 0) {
+    list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px">سلة المهملات فارغة</p>';
+    return;
+  }
+  list.innerHTML = state.trash.map((m,i) => `
+    <div class="trash-item">
+      <span>${m.name}</span>
+      <button class="restore-btn" onclick="restoreMember(${i})">استرجاع</button>
+    </div>
+  `).join('');
+}
+
+function restoreMember(idx) {
+  const m = state.trash[idx];
+  state.members.push({ id: m.id, name: m.name });
+  // Restore data
+  Object.keys(m.data).forEach(year => {
+    if (!state.data[year]) state.data[year] = {};
+    state.data[year][m.id] = m.data[year][m.id] || Array(12).fill(false);
+  });
+  state.trash.splice(idx, 1);
+  saveState();
+  renderTable();
+  updateStats();
+  openTrash(); // refresh
+  showToast('تم استرجاع ' + m.name);
+}
+
+// ========== SEARCH ==========
+function doSearch() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const res = document.getElementById('search-results');
+  if (!q) { res.innerHTML = ''; return; }
+  const year = state.currentYear;
+  const matched = state.members.filter(m => m.name.includes(q));
+  if (matched.length === 0) { res.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:10px">لا نتائج</p>'; return; }
+
+  res.innerHTML = matched.map(m => {
+    const mData = (state.data[year] && state.data[year][m.id]) || Array(12).fill(false);
+    const paid = mData.filter(Boolean).length;
+    const monthBadges = MONTHS.map((mn,i) =>
+      `<span class="month-badge ${mData[i]?'paid':'unpaid'}">${mn.slice(0,3)}</span>`
+    ).join('');
+    return `<div class="search-result-item">
+      <div class="sr-name">${m.name} — <span style="color:var(--primary)">${paid * state.contribValue} جنيه</span> (${paid}/12)</div>
+      <div class="sr-months">${monthBadges}</div>
+    </div>`;
+  }).join('');
+}
+
+// ========== CALENDAR ==========
+let calYear = 2026;
+function changeCalYear(dir) {
+  const next = calYear + dir;
+  if (next < MIN_YEAR) return;
+  calYear = next;
+  document.getElementById('cal-year-display').textContent = calYear;
+  renderCalContent();
+}
+
+function renderCalContent() {
+  const year = calYear;
+  const div = document.getElementById('cal-content');
+  if (!state.data[year]) {
+    div.innerHTML = '<p style="text-align:center;color:var(--text-muted)">لا توجد بيانات لهذه السنة بعد</p>';
+    return;
+  }
+  const rows = state.members.map(m => {
+    const mData = (state.data[year] && state.data[year][m.id]) || Array(12).fill(false);
+    const paid = mData.filter(Boolean).length;
+    return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span>${m.name}</span>
+      <span style="color:var(--primary);font-weight:700">${paid}/12 — ${paid*state.contribValue} ج</span>
+    </div>`;
+  }).join('');
+  div.innerHTML = rows || '<p style="text-align:center;color:var(--text-muted)">لا يوجد مساهمون</p>';
+}
+
+function viewYear() {
+  state.currentYear = calYear;
+  ensureYearData(calYear);
+  renderTable();
+  updateStats();
+  closeModal('calendar-modal');
+  showToast('عرض سنة ' + calYear);
+}
+
+// ========== CHART ==========
+function renderChart() {
+  const year = state.currentYear;
+  ensureYearData(year);
+  document.getElementById('chart-year-label').textContent = year;
+  const scores = state.members.map(m => {
+    const mData = (state.data[year] && state.data[year][m.id]) || Array(12).fill(false);
+    return { name: m.name, paid: mData.filter(Boolean).length };
+  }).sort((a,b) => b.paid - a.paid).slice(0,10);
+
+  const chart = document.getElementById('bar-chart');
+  const legend = document.getElementById('chart-legend');
+
+  if (scores.length === 0) {
+    chart.innerHTML = '<p style="padding:20px;color:var(--text-muted)">لا توجد بيانات</p>';
+    return;
+  }
+
+  const maxPaid = Math.max(...scores.map(s=>s.paid), 1);
+  chart.innerHTML = scores.map((s,i) => {
+    const h = Math.max((s.paid/maxPaid)*140, 4);
+    const cls = i===0?'top1':i===1?'top2':i===2?'top3':'';
+    return `<div class="bar-item">
+      <div class="bar-val">${s.paid*state.contribValue}ج</div>
+      <div class="bar-fill ${cls}" style="height:${h}px"></div>
+      <div class="bar-label">${s.name}</div>
+    </div>`;
+  }).join('');
+
+  legend.innerHTML = `<div style="color:var(--text-muted)">المبلغ = عدد الأشهر × ${state.contribValue} جنيه</div>`;
+}
+
+// ========== CALCULATOR ==========
+let calcExpr = '';
+let calcResult = false;
+
+function calcAction(val) {
+  const disp = document.getElementById('calc-display');
+  if (val === 'C') { calcExpr = ''; disp.textContent = '0'; calcResult = false; return; }
+  if (val === '=') {
+    try {
+      let expr = calcExpr.replace(/÷/g,'/').replace(/×/g,'*');
+      const res = Function('"use strict"; return (' + expr + ')')();
+      disp.textContent = isFinite(res) ? +res.toFixed(10) : 'خطأ';
+      calcExpr = String(isFinite(res) ? +res.toFixed(10) : '');
+      calcResult = true;
+    } catch { disp.textContent = 'خطأ'; calcExpr = ''; }
+    return;
+  }
+  if (val === '±') {
+    if (calcExpr && !isNaN(parseFloat(calcExpr))) calcExpr = String(-parseFloat(calcExpr));
+    disp.textContent = calcExpr || '0'; return;
+  }
+  if (val === '%') {
+    try {
+      let v = Function('"use strict"; return (' + calcExpr + ')')();
+      calcExpr = String(v/100); disp.textContent = calcExpr;
+    } catch {}
+    return;
+  }
+  if (calcResult && !isNaN(val)) { calcExpr = val; calcResult = false; }
+  else calcExpr += val;
+  disp.textContent = calcExpr;
+}
+
+// ========== AYAT ==========
+const ayat = [
+  { text: '﴿ وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ وَأَنَّ سَعْيَهُ سَوْفَ يُرَىٰ ثُمَّ يُجْزَاهُ الْجَزَاءَ الْأَوْفَىٰ ﴾', cls: 'ayat-1' },
+  { text: '﴿ إِنْ أَحْسَنتُمْ أَحْسَنتُمْ لِأَنفُسِكُمْ ﴾', cls: 'ayat-2' },
+  { text: '﴿ وَمَا أَنفَقْتُم مِّن شَيْءٍ فَهُوَ يُخْلِفُهُ ﴾', cls: 'ayat-3' }
+];
+let ayatIdx = 0;
+
+function showAyah() {
+  const banner = document.getElementById('ayat-banner');
+  banner.style.opacity = '0';
+  setTimeout(() => {
+    const a = ayat[ayatIdx % ayat.length];
+    banner.textContent = a.text;
+    banner.className = 'ayat-banner ' + a.cls;
+    banner.style.opacity = '1';
+    ayatIdx++;
+  }, 500);
+}
+
+function startAyatRotation() {
+  showAyah();
+  setInterval(showAyah, 30000);
+}
+
+// ========== SETTINGS ==========
+function saveSettings() {
+  const v = parseInt(document.getElementById('contrib-value-input').value);
+  if (!v || v < 1) { showToast('قيمة غير صحيحة'); return; }
+  state.contribValue = v;
+  saveState();
+  renderTable();
+  updateStats();
+  closeModal('settings-modal');
+  showToast('تم تحديث قيمة المساهمة إلى ' + v + ' جنيه');
+}
+
+// ========== MODAL HELPERS ==========
+function openModal(id) {
+  document.getElementById(id).style.display = 'flex';
+  if (id === 'trash-modal') openTrash();
+  if (id === 'chart-modal') renderChart();
+  if (id === 'calendar-modal') { renderCalContent(); }
+  if (id === 'settings-modal') {
+    document.getElementById('contrib-value-input').value = state.contribValue;
+  }
+}
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+function closeModalOutside(e, id) {
+  if (e.target.id === id) closeModal(id);
+}
+
+// ========== TOAST ==========
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ========== SPLASH ==========
+window.addEventListener('load', () => {
+  init();
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    splash.style.opacity = '0';
+    setTimeout(() => {
+      splash.style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      document.getElementById('app').style.flexDirection = 'column';
+    }, 800);
+  }, 3000);
+});
+
+// Enter key for add member
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const addModal = document.getElementById('add-modal');
+    if (addModal.style.display !== 'none') addMember();
+  }
+});
+
+// ========== SERVICE WORKER ==========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(e => console.log('SW error', e));
+  });
+}
+</script>
+</body>
+</html>
