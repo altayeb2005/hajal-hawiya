@@ -116,5 +116,9 @@ if(!S.ts){try{S=mig(JSON.parse(localStorage.hajal_hawiya_v2));localStorage[K]=JS
 draw();nv();setInterval(nv,30000);pull();
 addEventListener('online',pull);document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
 setTimeout(()=>{$('#sp').style.opacity=0;setTimeout(()=>{$('#sp').hidden=true;if(sessionStorage.ok)$('#app').hidden=false;else $('#lk').hidden=false},600)},3000);
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');document.head.insertAdjacentHTML('beforeend','<style>.nm i{display:inline-block;padding:12px 10px;font-size:20px}</style>');
+$('#tb').onclick=e=>{const d=e.target.closest('[data-del]');if(d){const m=S.m.find(x=>x.id==d.dataset.del);mo('<h3>حذف مساهم</h3><p style="text-align:center;margin-bottom:8px">نقل «'+esc(m.n)+'» إلى المهملات؟ يمكنك استرجاعه لاحقاً.</p><button class="pr" style="background:#c2410c" onclick="dl(\''+m.id+'\')">نعم، احذف</button>');return}const c=e.target.closest('[data-c]');if(c){const[i,k]=c.dataset.c.split(':'),a=arr(Y,i);a[k]=a[k]?0:S.t;sv()}};
+function dl(i){S.m.find(x=>x.id==i).d=1;sv();cm()}
+function cpn(){mo('<h3>تغيير الرمز السري</h3><input id="np" type="password" placeholder="الرمز الجديد (4 أحرف على الأقل)"><button class="pr" onclick="spn()">حفظ</button>')}
+function spn(){const p=$('#np').value;if(p.length>=4){S.ph=h(p);sv();cm()}}
 </script></body></html>
