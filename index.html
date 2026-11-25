@@ -121,4 +121,9 @@ $('#tb').onclick=e=>{const d=e.target.closest('[data-del]');if(d){const m=S.m.fi
 function dl(i){S.m.find(x=>x.id==i).d=1;sv();cm()}
 function cpn(){mo('<h3>تغيير الرمز السري</h3><input id="np" type="password" placeholder="الرمز الجديد (4 أحرف على الأقل)"><button class="pr" onclick="spn()">حفظ</button>')}
 function spn(){const p=$('#np').value;if(p.length>=4){S.ph=h(p);sv();cm()}}
+ document.head.insertAdjacentHTML('beforeend','<style>#app{display:block!important;height:auto!important}#tw{margin:4px 6px 130px!important;flex:none!important}tr:first-child th{position:relative;z-index:3}tr:first-child .nm{position:sticky;right:0;z-index:5}</style>');
+document.querySelectorAll('#tw>div').forEach(d=>d.remove());
+function hs(){const t=$('#tb'),r=t.rows[0];if(!r)return;const y=Math.max(0,Math.min(-t.getBoundingClientRect().top,t.offsetHeight-r.offsetHeight));[...r.cells].forEach(c=>c.style.transform=y?'translateY('+y+'px)':'')}
+const d0=draw;draw=function(){d0();hs()};
+addEventListener('scroll',hs,{passive:true});
 </script></body></html>
